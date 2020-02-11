@@ -26,12 +26,12 @@ def read1():
     mpsas=float(data[1][:-1])   #mpsas
     nelm=round(7.93-5*math.log10(math.pow(10,4.316-(mpsas/5.))+1),2) #nelm
     temp=float(data[-1][:-1])  #temperature in C
-    
+
     mpsasVar.set(mpsas)
     nelmVar.set(nelm)
     tempVar.set(temp)
     timeVar.set(t)
-       
+
     if saveVar.get():
         name=pathVar.get()+'sqm_'+time.strftime('%Y_%m_%d')+'.dat'
         if os.path.isfile(name): f=open(name,'a')
@@ -49,12 +49,12 @@ async def read_loop():
     while loopTest:
         if time.time()-t0>dt: t0=read1()
         await asyncio.sleep(0.1)
-    
+
 def stop():
     '''stop repeated reading'''
     global loopTest
     loopTest=False
-    
+
 def reading():
     '''start repeated reading'''
     global loop,loopTest
@@ -62,13 +62,13 @@ def reading():
     loop=asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(read_loop())
-    
+
 def init():
     '''init serial COM port'''
     global com
     com=serial.Serial(portVar.get())
     com.baudrate=baudVar.get()
-    
+
 def select_path(event):
     path=os.getcwd().replace('\\','/')
     if len(pathVar.get())>0:
