@@ -12,11 +12,11 @@ import serial.tools.list_ports
 def read1():
     '''read one data'''
     t0=time.time()
-    if com in globals():
+    try:
         com.write(b'rx\r')            
         time.sleep(5)  #wait for completing measurements
         ans=com.readline().decode().strip()
-    else: ans='r, 19.42m,0000005915Hz,0000000000c,0000000.000s, 027.0C'  #TODO: development    
+    except NameError: ans='r, 19.42m,0000005915Hz,0000000000c,0000000.000s, 027.0C'  #TODO: development    
     data=ans.split(',')     #r,-09.42m,0000005915Hz,0000000000c,0000000.000s, 027.0C -> r,mpsas,freq,period,per,temp 
     t=time.strftime('%Y_%m_%d %H:%M:%S',time.localtime(t0))
     mpsas=float(data[1][:-1])   #mpsas
