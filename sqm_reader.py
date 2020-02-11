@@ -17,11 +17,11 @@ def read1():
     '''read one data'''
     t0=time.time()
     try:
-        com.write(b'rx\r')            
+        com.write(b'rx\r')
         time.sleep(5)  #wait for completing measurements
         ans=com.readline().decode().strip()
-    except NameError: ans='r, 19.42m,0000005915Hz,0000000000c,0000000.000s, 027.0C'  #TODO: development    
-    data=ans.split(',')     #r,-09.42m,0000005915Hz,0000000000c,0000000.000s, 027.0C -> r,mpsas,freq,period,per,temp 
+    except NameError: ans='r, 19.42m,0000005915Hz,0000000000c,0000000.000s, 027.0C'  #TODO: development
+    data=ans.split(',')     #r,-09.42m,0000005915Hz,0000000000c,0000000.000s, 027.0C -> r,mpsas,freq,period,per,temp
     t=time.strftime('%Y_%m_%d %H:%M:%S',time.localtime(t0))
     mpsas=float(data[1][:-1])   #mpsas
     nelm=round(7.93-5*math.log10(math.pow(10,4.316-(mpsas/5.))+1),2) #nelm
@@ -32,7 +32,7 @@ def read1():
     tempVar.set(temp)
     timeVar.set(t)
        
-    if saveVar.get(): 
+    if saveVar.get():
         name=pathVar.get()+'sqm_'+time.strftime('%Y_%m_%d')+'.dat'
         if os.path.isfile(name): f=open(name,'a')
         else:
@@ -74,7 +74,7 @@ def select_path(event):
     if len(pathVar.get())>0:
         if os.path.isdir(pathVar.get()): path=pathVar.get()
     path=filedialog.askdirectory(parent=root,title='SQM Reader - data folder',initialdir=path)
-    if len(path)>0: 
+    if len(path)>0:
         path=path.replace('\\','/')
         cwd=os.getcwd().replace('\\','/')+'/'
         if cwd in path: path=path.replace(cwd,'')    #uloz relativnu cestu
@@ -82,11 +82,11 @@ def select_path(event):
         if len(path)>0:
             if not path[-1]=='/': path+='/'
         pathVar.set(path)
-    
-def exit():
+
+def close():
     global root
     stop()
-    try: com.close() 
+    try: com.close()
     except NameError: pass  #not used
     f=open('sqm_config.txt','w')
     f.write(portVar.get()+'\n')
@@ -101,7 +101,7 @@ def exit():
 root=tk.Tk()
 root.geometry('400x350')
 root.title('SQM Reader')
-root.protocol('WM_DELETE_WINDOW',exit)
+root.protocol('WM_DELETE_WINDOW',close)
 
 portVar=tk.StringVar(root)
 baudVar=tk.IntVar(root)
