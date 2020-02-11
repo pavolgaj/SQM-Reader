@@ -1,7 +1,11 @@
+#!/usr/bin/python3
+# version 0.1.0 11-02-2020
 import sys
 import os
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter import messagebox
+from tkinter import filedialog
 import time
 import asyncio
 import threading
@@ -65,11 +69,32 @@ def init():
     com=serial.Serial(portVar.get())
     com.baudrate=baudVar.get()
     
+def select_path(event):
+    path=os.getcwd().replace('\\','/')
+    if len(pathVar.get())>0:
+        if os.path.isdir(pathVar.get()): path=pathVar.get()
+    path=filedialog.askdirectory(parent=root,title='SQM Reader - data folder',initialdir=path)
+    if len(path)>0: 
+        path=path.replace('\\','/')
+        cwd=os.getcwd().replace('\\','/')+'/'
+        if cwd in path: path=path.replace(cwd,'')    #uloz relativnu cestu
+        if path==cwd[:-1]: path=''
+        if len(path)>0:
+            if not path[-1]=='/': path+='/'
+        pathVar.set(path)
+    
 def exit():
     global root
     stop()
     try: com.close() 
     except NameError: pass  #not used
+    f=open('sqm_config.txt','w')
+    f.write(portVar.get()+'\n')
+    f.write(str(baudVar.get())+'\n')
+    f.write(pathVar.get()+'\n')
+    f.write(str(saveVar.get())+'\n')
+    f.write(str(dtVar.get())+'\n')
+    f.close()
     root.destroy()
     root=None
 
@@ -88,10 +113,6 @@ nelmVar=tk.DoubleVar(root)
 tempVar=tk.DoubleVar(root)
 timeVar=tk.StringVar(root)
 
-saveVar.set(0)
-baudVar.set(115200)
-dtVar.set(1)
-
 Label1=tk.Label(root)
 Label1.place(relx=0.04,rely=0.03,height=21,width=30)
 Label1.configure(text='Port')
@@ -101,6 +122,7 @@ TCombobox1.place(relx=0.13,rely=0.03,relheight=0.06,relwidth=0.29)
 TCombobox1.configure(values=sorted([x.device for x in serial.tools.list_ports.comports()]))
 TCombobox1.configure(textvariable=portVar)
 TCombobox1.configure(width=137)
+TCombobox1.configure(state='readonly')
 
 Label2=tk.Label(root)
 Label2.place(relx=0.46,rely=0.03,height=21,width=63)
@@ -111,6 +133,7 @@ TCombobox2.place(relx=0.65,rely=0.03,relheight=0.06,relwidth=0.31)
 TCombobox2.configure(values=[9600,14400,19200,38400,56000,57600,115200,128000,256000])
 TCombobox2.configure(textvariable=baudVar)
 TCombobox2.configure(width=147)
+TCombobox2.configure(state='readonly')
 
 Button1=tk.Button(root)
 Button1.place(relx=0.36,rely=0.11,height=29,width=127)
@@ -132,6 +155,8 @@ Entry1.place(relx=0.04,rely=0.29,height=23,relwidth=0.92)
 Entry1.configure(background='white')
 Entry1.configure(width=436)
 Entry1.configure(textvariable=pathVar)
+Entry1.configure(state='readonly')
+Entry1.bind('<Button-1>',select_path)
 
 Button2=tk.Button(root)
 Button2.place(relx=0.04,rely=0.4,height=29,width=59)
@@ -169,6 +194,7 @@ Entry3.configure(background='white')
 Entry3.configure(font=('',18))
 Entry3.configure(width=316)
 Entry3.configure(textvariable=mpsasVar)
+Entry3.configure(state='readonly')
 
 Label6=tk.Label(root)
 Label6.place(relx=0.06,rely=0.68,height=21,width=41)
@@ -179,6 +205,7 @@ Entry4.place(relx=0.3,rely=0.7,height=23,relwidth=0.65)
 Entry4.configure(background='white')
 Entry4.configure(width=306)
 Entry4.configure(textvariable=nelmVar)
+Entry4.configure(state='readonly')
 
 Label7=tk.Label(root)
 Label7.place(relx=0.06,rely=0.78,height=21,width=88)
@@ -189,6 +216,7 @@ Entry5.place(relx=0.32,rely=0.78,height=23,relwidth=0.62)
 Entry5.configure(background='white')
 Entry5.configure(width=296)
 Entry5.configure(textvariable=tempVar)
+Entry5.configure(state='readonly')
 
 Label8=tk.Label(root)
 Label8.place(relx=0.06,rely=0.88,height=21,width=37)
@@ -199,6 +227,22 @@ Entry6.place(relx=0.3,rely=0.88,height=23,relwidth=0.65)
 Entry6.configure(background='white')
 Entry6.configure(width=306)
 Entry6.configure(textvariable=timeVar)
+Entry6.configure(state='readonly')
+
+
+if os.path.isfile('sqm_config.txt'):
+    f=open('sqm_config.txt','r')
+    lines=f.readlines()
+    f.close()
+    if lines[0].strip() in TCombobox1['values']: portVar.set(lines[0].strip())
+    baudVar.set(int(lines[1]))
+    pathVar.set(lines[2].strip())
+    saveVar.set(lines[3].strip()=='True')
+    dtVar.set(float(lines[4]))
+else:
+    saveVar.set(0)
+    baudVar.set(115200)
+    dtVar.set(1)
 
 
 tk.mainloop()
