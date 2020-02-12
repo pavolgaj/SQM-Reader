@@ -13,14 +13,24 @@ import math
 import serial
 import serial.tools.list_ports
 
-def read1():
+devel=False
+
+def read1(block=True):
     '''read one data'''
+    if block:  #block buttons for 1 reading
+        Button1.configure(state=tk.DISABLED)
+        Button2.configure(state=tk.DISABLED)
+        Button3.configure(state=tk.DISABLED)
+        Button2.update()
+        Button3.update()
     t0=time.time()
-    try:
+    if devel: 
+        ans='r, 19.42m,0000005915Hz,0000000000c,0000000.000s, 027.0C'  #TODO: development
+        time.sleep(5)
+    else:
         com.write(b'rx\r')
         time.sleep(5)  #wait for completing measurements
         ans=com.readline().decode().strip()
-    except NameError: ans='r, 19.42m,0000005915Hz,0000000000c,0000000.000s, 027.0C'  #TODO: development
     data=ans.split(',')     #r,-09.42m,0000005915Hz,0000000000c,0000000.000s, 027.0C -> r,mpsas,freq,period,per,temp
     t=time.strftime('%Y_%m_%d %H:%M:%S',time.localtime(t0))
     mpsas=float(data[1][:-1])   #mpsas
@@ -39,7 +49,10 @@ def read1():
             f=open(name,'w')
             f.write('Date Time MPSAS NELM Temp(C)\n')
         f.write('%s %5.2f %5.2f %4.1f\n' %(t,mpsas,nelm,temp))
-        f.close()
+    if block:  #unblock buttons for 1 reading
+        Button1.configure(state=tk.NORMAL)
+        Button2.configure(state=tk.NORMAL)
+        Button3.configure(state=tk.NORMAL)
     return t0
 
 async def read_loop():
@@ -47,7 +60,7 @@ async def read_loop():
     t0=0
     dt=60*dtVar.get()  #interval in sec
     while loopTest:
-        if time.time()-t0>dt: t0=read1()
+        if time.time()-t0>dt: t0=read1(block=False)
         await asyncio.sleep(0.1)
 
 def stop():
@@ -58,16 +71,30 @@ def stop():
 def reading():
     '''start repeated reading'''
     global loop,loopTest
+    Button1.configure(state=tk.DISABLED)
+    Button2.configure(state=tk.DISABLED)
+    Button3.configure(state=tk.DISABLED)
+    Button4.configure(state=tk.NORMAL)
+    Entry2.configure(state='readonly')
     loopTest=True
     loop=asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(read_loop())
+    Button1.configure(state=tk.NORMAL)
+    Button2.configure(state=tk.NORMAL)
+    Button3.configure(state=tk.NORMAL)
+    Button4.configure(state=tk.DISABLED)
+    Entry2.configure(state=tk.NORMAL)
 
 def init():
     '''init serial COM port'''
     global com
-    com=serial.Serial(portVar.get())
-    com.baudrate=baudVar.get()
+    if not devel:  #TODO: development
+        com=serial.Serial(portVar.get())
+        time.sleep(1)
+        com.baudrate=baudVar.get()             
+    Button2.configure(state=tk.NORMAL)
+    Button3.configure(state=tk.NORMAL)
 
 def select_path(event):
     path=os.getcwd().replace('\\','/')
@@ -102,6 +129,8 @@ root=tk.Tk()
 root.geometry('400x350')
 root.title('SQM Reader')
 root.protocol('WM_DELETE_WINDOW',close)
+try: root.iconbitmap('sqm.ico')   #win
+except: pass
 
 portVar=tk.StringVar(root)
 baudVar=tk.IntVar(root)
@@ -162,11 +191,13 @@ Button2=tk.Button(root)
 Button2.place(relx=0.04,rely=0.4,height=29,width=59)
 Button2.configure(text='Read')
 Button2.configure(command=read1)
+Button2.configure(state=tk.DISABLED)
 
-Button4=tk.Button(root)
-Button4.place(relx=0.19,rely=0.4,height=29,width=100)
-Button4.configure(text='Read every')
-Button4.configure(command=lambda: threading.Thread(target=reading).start())
+Button3=tk.Button(root)
+Button3.place(relx=0.19,rely=0.4,height=29,width=100)
+Button3.configure(text='Read every')
+Button3.configure(command=lambda: threading.Thread(target=reading).start())
+Button3.configure(state=tk.DISABLED)
 
 Entry2=tk.Entry(root)
 Entry2.place(relx=0.44,rely=0.4,height=23,relwidth=0.16)
@@ -178,10 +209,11 @@ Label4=tk.Label(root)
 Label4.place(relx=0.63,rely=0.4,height=21,width=57)
 Label4.configure(text='minutes')
 
-Button3=tk.Button(root)
-Button3.place(relx=0.8,rely=0.4,height=29,width=55)
-Button3.configure(text='Stop')
-Button3.configure(command=stop)
+Button4=tk.Button(root)
+Button4.place(relx=0.8,rely=0.4,height=29,width=55)
+Button4.configure(text='Stop')
+Button4.configure(command=stop)
+Button4.configure(state=tk.DISABLED)
 
 Label5=tk.Label(root)
 Label5.place(relx=0.06,rely=0.56,height=33,width=85)
