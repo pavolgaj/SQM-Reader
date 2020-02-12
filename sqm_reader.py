@@ -24,7 +24,7 @@ def read1(block=True):
         Button2.update()
         Button3.update()
     t0=time.time()
-    if devel: 
+    if devel:
         ans='r, 19.42m,0000005915Hz,0000000000c,0000000.000s, 027.0C'  #TODO: development
         time.sleep(5)
     else:
@@ -92,7 +92,7 @@ def init():
     if not devel:  #TODO: development
         com=serial.Serial(portVar.get())
         time.sleep(1)
-        com.baudrate=baudVar.get()             
+        com.baudrate=baudVar.get()
     Button2.configure(state=tk.NORMAL)
     Button3.configure(state=tk.NORMAL)
 
