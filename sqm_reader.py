@@ -130,7 +130,11 @@ root.geometry('400x350')
 root.title('SQM Reader')
 root.protocol('WM_DELETE_WINDOW',close)
 try: root.iconbitmap('sqm.ico')   #win
-except: pass
+except:
+    try: #linux
+        img=tk.Image('photo',file='sqm.png')
+        root.tk.call('wm','iconphoto',root._w,img)
+    except: pass
 
 portVar=tk.StringVar(root)
 baudVar=tk.IntVar(root)
