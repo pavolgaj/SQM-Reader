@@ -152,7 +152,7 @@ TCombobox1.configure(width=137)
 TCombobox1.configure(state='readonly')
 
 Label2=tk.Label(root)
-Label2.place(relx=0.5,rely=0.03,height=21,width=63)
+Label2.place(relx=0.48,rely=0.03,height=21,width=63)
 Label2.configure(text='Baudrate')
 Label2.configure(anchor='w')
 
@@ -177,7 +177,7 @@ Checkbutton1.configure(text='Save to file')
 Checkbutton1.configure(anchor='w')
 
 Label3=tk.Label(root)
-Label3.place(relx=0.04,rely=0.29,height=21,width=30)
+Label3.place(relx=0.04,rely=0.29,height=21,width=40)
 Label3.configure(text='Path')
 Label3.configure(anchor='w')
 
