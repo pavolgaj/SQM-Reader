@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# version 0.1.0 11-02-2020
+# version 0.1.0 13-02-2020
 import sys
 import os
 import tkinter as tk
@@ -13,8 +13,6 @@ import math
 import serial
 import serial.tools.list_ports
 
-devel=False
-
 def read1(block=True):
     '''read one data'''
     if block:  #block buttons for 1 reading
@@ -24,13 +22,9 @@ def read1(block=True):
         Button2.update()
         Button3.update()
     t0=time.time()
-    if devel:
-        ans='r, 19.42m,0000005915Hz,0000000000c,0000000.000s, 027.0C'  #TODO: development
-        time.sleep(5)
-    else:
-        com.write(b'rx\r')
-        time.sleep(5)  #wait for completing measurements
-        ans=com.readline().decode().strip()
+    com.write(b'rx\r')
+    time.sleep(5)  #wait for completing measurements
+    ans=com.readline().decode().strip()
     data=ans.split(',')     #r,-09.42m,0000005915Hz,0000000000c,0000000.000s, 027.0C -> r,mpsas,freq,period,per,temp
     t=time.strftime('%Y_%m_%d %H:%M:%S',time.localtime(t0))
     mpsas=float(data[1][:-1])   #mpsas
@@ -89,10 +83,9 @@ def reading():
 def init():
     '''init serial COM port'''
     global com
-    if not devel:  #TODO: development
-        com=serial.Serial(portVar.get())
-        time.sleep(1)
-        com.baudrate=baudVar.get()
+    com=serial.Serial(portVar.get())
+    time.sleep(1)
+    com.baudrate=baudVar.get()
     Button2.configure(state=tk.NORMAL)
     Button3.configure(state=tk.NORMAL)
 
@@ -149,42 +142,47 @@ timeVar=tk.StringVar(root)
 Label1=tk.Label(root)
 Label1.place(relx=0.04,rely=0.03,height=21,width=30)
 Label1.configure(text='Port')
+Label1.configure(anchor='w')
 
 TCombobox1=ttk.Combobox(root)
-TCombobox1.place(relx=0.13,rely=0.03,relheight=0.06,relwidth=0.29)
+TCombobox1.place(relx=0.13,rely=0.03,relheight=0.06,relwidth=0.3)
 TCombobox1.configure(values=sorted([x.device for x in serial.tools.list_ports.comports()]))
 TCombobox1.configure(textvariable=portVar)
 TCombobox1.configure(width=137)
 TCombobox1.configure(state='readonly')
 
 Label2=tk.Label(root)
-Label2.place(relx=0.46,rely=0.03,height=21,width=63)
+Label2.place(relx=0.5,rely=0.03,height=21,width=63)
 Label2.configure(text='Baudrate')
+Label2.configure(anchor='w')
 
 TCombobox2=ttk.Combobox(root)
-TCombobox2.place(relx=0.65,rely=0.03,relheight=0.06,relwidth=0.31)
+TCombobox2.place(relx=0.65,rely=0.03,relheight=0.06,relwidth=0.3)
 TCombobox2.configure(values=[9600,14400,19200,38400,56000,57600,115200,128000,256000])
 TCombobox2.configure(textvariable=baudVar)
 TCombobox2.configure(width=147)
 TCombobox2.configure(state='readonly')
 
 Button1=tk.Button(root)
-Button1.place(relx=0.36,rely=0.11,height=29,width=127)
+Button1.place(relx=0.33,rely=0.11,height=29,width=127)
 Button1.configure(text='Init')
 Button1.configure(width=127)
 Button1.configure(command=init)
 
-Label3=tk.Label(root)
-Label3.place(relx=0.04,rely=0.21,height=21,width=78)
-Label3.configure(text='Save to file')
-
 Checkbutton1=tk.Checkbutton(root)
-Checkbutton1.place(relx=0.21,rely=0.21,relheight=0.06,relwidth=0.06)
+Checkbutton1.place(relx=0.04,rely=0.21,relheight=0.06,relwidth=0.4)
 Checkbutton1.configure(justify=tk.LEFT)
 Checkbutton1.configure(variable=saveVar)
+Checkbutton1.configure(text='Save to file')
+Checkbutton1.configure(anchor='w') 
+
+Label3=tk.Label(root)
+Label3.place(relx=0.04,rely=0.29,height=21,width=30)
+Label3.configure(text='Path')
+Label3.configure(anchor='w')
 
 Entry1=tk.Entry(root)
-Entry1.place(relx=0.04,rely=0.29,height=23,relwidth=0.92)
+Entry1.place(relx=0.15,rely=0.29,height=23,relwidth=0.81)
 Entry1.configure(background='white')
 Entry1.configure(width=436)
 Entry1.configure(textvariable=pathVar)
@@ -198,34 +196,36 @@ Button2.configure(command=read1)
 Button2.configure(state=tk.DISABLED)
 
 Button3=tk.Button(root)
-Button3.place(relx=0.19,rely=0.4,height=29,width=100)
+Button3.place(relx=0.22,rely=0.4,height=29,width=100)
 Button3.configure(text='Read every')
 Button3.configure(command=lambda: threading.Thread(target=reading).start())
 Button3.configure(state=tk.DISABLED)
 
 Entry2=tk.Entry(root)
-Entry2.place(relx=0.44,rely=0.4,height=23,relwidth=0.16)
+Entry2.place(relx=0.5,rely=0.41,height=23,relwidth=0.15)
 Entry2.configure(background='white')
 Entry2.configure(width=76)
 Entry2.configure(textvariable=dtVar)
 
 Label4=tk.Label(root)
-Label4.place(relx=0.63,rely=0.4,height=21,width=57)
+Label4.place(relx=0.66,rely=0.41,height=21,width=57)
 Label4.configure(text='minutes')
+Label4.configure(anchor='w')
 
 Button4=tk.Button(root)
-Button4.place(relx=0.8,rely=0.4,height=29,width=55)
+Button4.place(relx=0.82,rely=0.4,height=29,width=55)
 Button4.configure(text='Stop')
 Button4.configure(command=stop)
 Button4.configure(state=tk.DISABLED)
 
 Label5=tk.Label(root)
-Label5.place(relx=0.06,rely=0.56,height=33,width=85)
+Label5.place(relx=0.04,rely=0.54,height=33,width=85)
 Label5.configure(font=('',18))
 Label5.configure(text='MPSAS')
+Label5.configure(anchor='w')
 
 Entry3=tk.Entry(root)
-Entry3.place(relx=0.3,rely=0.56,height=33,relwidth=0.67)
+Entry3.place(relx=0.3,rely=0.54,height=33,relwidth=0.66)
 Entry3.configure(background='white')
 Entry3.configure(font=('',18))
 Entry3.configure(width=316)
@@ -233,33 +233,36 @@ Entry3.configure(textvariable=mpsasVar)
 Entry3.configure(state='readonly')
 
 Label6=tk.Label(root)
-Label6.place(relx=0.06,rely=0.68,height=21,width=41)
+Label6.place(relx=0.04,rely=0.68,height=21,width=41)
 Label6.configure(text='NELM')
+Label6.configure(anchor='w')
 
 Entry4=tk.Entry(root)
-Entry4.place(relx=0.3,rely=0.7,height=23,relwidth=0.65)
+Entry4.place(relx=0.3,rely=0.68,height=23,relwidth=0.66)
 Entry4.configure(background='white')
 Entry4.configure(width=306)
 Entry4.configure(textvariable=nelmVar)
 Entry4.configure(state='readonly')
 
 Label7=tk.Label(root)
-Label7.place(relx=0.06,rely=0.78,height=21,width=88)
+Label7.place(relx=0.04,rely=0.78,height=21,width=88)
 Label7.configure(text='Temperature')
+Label7.configure(anchor='w')
 
 Entry5=tk.Entry(root)
-Entry5.place(relx=0.32,rely=0.78,height=23,relwidth=0.62)
+Entry5.place(relx=0.3,rely=0.78,height=23,relwidth=0.66)
 Entry5.configure(background='white')
 Entry5.configure(width=296)
 Entry5.configure(textvariable=tempVar)
 Entry5.configure(state='readonly')
 
 Label8=tk.Label(root)
-Label8.place(relx=0.06,rely=0.88,height=21,width=37)
+Label8.place(relx=0.04,rely=0.88,height=21,width=37)
 Label8.configure(text='Time')
+Label8.configure(anchor='w')
 
 Entry6=tk.Entry(root)
-Entry6.place(relx=0.3,rely=0.88,height=23,relwidth=0.65)
+Entry6.place(relx=0.3,rely=0.88,height=23,relwidth=0.66)
 Entry6.configure(background='white')
 Entry6.configure(width=306)
 Entry6.configure(textvariable=timeVar)
