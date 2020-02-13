@@ -174,7 +174,7 @@ Checkbutton1.place(relx=0.04,rely=0.21,relheight=0.06,relwidth=0.4)
 Checkbutton1.configure(justify=tk.LEFT)
 Checkbutton1.configure(variable=saveVar)
 Checkbutton1.configure(text='Save to file')
-Checkbutton1.configure(anchor='w') 
+Checkbutton1.configure(anchor='w')
 
 Label3=tk.Label(root)
 Label3.place(relx=0.04,rely=0.29,height=21,width=30)
