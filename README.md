@@ -1,4 +1,8 @@
 # SQM-Reader
+
+![](https://img.shields.io/github/languages/top/pavolgaj/SQM-Reader.svg?style=flat)
+![GitHub All Releases](https://img.shields.io/github/downloads/pavolgaj/SQM-Reader/total)
+
 Python SQM Reader for Unihedron SQM-LU or compatible.
 
 ### Requirements
