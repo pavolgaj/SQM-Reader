@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# version 0.1.0 13-02-2020
+# version 0.1.1 29-08-2020
 import sys
 import os
 import tkinter as tk
@@ -26,7 +26,8 @@ def read1(block=True):
     time.sleep(5)  #wait for completing measurements
     ans=com.readline().decode().strip()
     data=ans.split(',')     #r,-09.42m,0000005915Hz,0000000000c,0000000.000s, 027.0C -> r,mpsas,freq,period,per,temp
-    t=time.strftime('%Y_%m_%d %H:%M:%S',time.localtime(t0))
+    #t=time.strftime('%Y_%m_%d %H:%M:%S',time.localtime(t0))
+    t=time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(t0))      #for better import to excel
     mpsas=float(data[1][:-1])   #mpsas
     nelm=round(7.93-5*math.log10(math.pow(10,4.316-(mpsas/5.))+1),2) #nelm
     temp=float(data[-1][:-1])  #temperature in C
@@ -38,6 +39,10 @@ def read1(block=True):
 
     if saveVar.get():
         name=pathVar.get()+'sqm_'+time.strftime('%Y_%m_%d')+'.dat'
+        #not create new file after midnight
+        if time.localtime().tm_hour<12 and not midnightVar.get():
+            if os.path.isfile(pathVar.get()+'sqm_'+time.strftime('%Y_%m_%d',time.localtime(time.time()-86400))+'.dat'):
+                name=pathVar.get()+'sqm_'+time.strftime('%Y_%m_%d',time.localtime(time.time()-86400))+'.dat'
         if os.path.isfile(name): f=open(name,'a')
         else:
             f=open(name,'w')
@@ -97,7 +102,7 @@ def select_path(event):
     if len(path)>0:
         path=path.replace('\\','/')
         cwd=os.getcwd().replace('\\','/')+'/'
-        if cwd in path: path=path.replace(cwd,'')    #uloz relativnu cestu
+        if cwd in path: path=path.replace(cwd,'')    #save relative path
         if path==cwd[:-1]: path=''
         if len(path)>0:
             if not path[-1]=='/': path+='/'
@@ -114,6 +119,7 @@ def close():
     f.write(pathVar.get()+'\n')
     f.write(str(saveVar.get())+'\n')
     f.write(str(dtVar.get())+'\n')
+    f.write(str(midnightVar.get())+'\n')
     f.close()
     root.destroy()
     root=None
@@ -134,6 +140,7 @@ baudVar=tk.IntVar(root)
 dtVar=tk.DoubleVar(root)
 pathVar=tk.StringVar(root)
 saveVar=tk.BooleanVar(root)
+midnightVar=tk.BooleanVar(root)
 mpsasVar=tk.DoubleVar(root)
 nelmVar=tk.DoubleVar(root)
 tempVar=tk.DoubleVar(root)
@@ -176,6 +183,13 @@ Checkbutton1.configure(variable=saveVar)
 Checkbutton1.configure(text='Save to file')
 Checkbutton1.configure(anchor='w')
 
+Checkbutton2=tk.Checkbutton(root)
+Checkbutton2.place(relx=0.5,rely=0.21,relheight=0.06,relwidth=0.4)
+Checkbutton2.configure(justify=tk.LEFT)
+Checkbutton2.configure(variable=midnightVar)
+Checkbutton2.configure(text='New file after midnight')
+Checkbutton2.configure(anchor='w')
+
 Label3=tk.Label(root)
 Label3.place(relx=0.04,rely=0.29,height=21,width=40)
 Label3.configure(text='Path')
@@ -203,7 +217,6 @@ Button3.configure(state=tk.DISABLED)
 
 Entry2=tk.Entry(root)
 Entry2.place(relx=0.5,rely=0.41,height=23,relwidth=0.15)
-Entry2.configure(background='white')
 Entry2.configure(width=76)
 Entry2.configure(textvariable=dtVar)
 
@@ -226,7 +239,6 @@ Label5.configure(anchor='w')
 
 Entry3=tk.Entry(root)
 Entry3.place(relx=0.3,rely=0.54,height=33,relwidth=0.66)
-Entry3.configure(background='white')
 Entry3.configure(font=('',18))
 Entry3.configure(width=316)
 Entry3.configure(textvariable=mpsasVar)
@@ -239,7 +251,6 @@ Label6.configure(anchor='w')
 
 Entry4=tk.Entry(root)
 Entry4.place(relx=0.3,rely=0.68,height=23,relwidth=0.66)
-Entry4.configure(background='white')
 Entry4.configure(width=306)
 Entry4.configure(textvariable=nelmVar)
 Entry4.configure(state='readonly')
@@ -251,7 +262,6 @@ Label7.configure(anchor='w')
 
 Entry5=tk.Entry(root)
 Entry5.place(relx=0.3,rely=0.78,height=23,relwidth=0.66)
-Entry5.configure(background='white')
 Entry5.configure(width=296)
 Entry5.configure(textvariable=tempVar)
 Entry5.configure(state='readonly')
@@ -263,7 +273,6 @@ Label8.configure(anchor='w')
 
 Entry6=tk.Entry(root)
 Entry6.place(relx=0.3,rely=0.88,height=23,relwidth=0.66)
-Entry6.configure(background='white')
 Entry6.configure(width=306)
 Entry6.configure(textvariable=timeVar)
 Entry6.configure(state='readonly')
@@ -278,6 +287,8 @@ if os.path.isfile('sqm_config.txt'):
     pathVar.set(lines[2].strip())
     saveVar.set(lines[3].strip()=='True')
     dtVar.set(float(lines[4]))
+    if len(lines)>5: midnightVar.set(lines[5].strip()=='True')
+    else: midnightVar.set(True)       #old version of config file
 else:
     saveVar.set(0)
     baudVar.set(115200)
