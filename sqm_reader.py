@@ -184,7 +184,7 @@ Checkbutton1.configure(text='Save to file')
 Checkbutton1.configure(anchor='w')
 
 Checkbutton2=tk.Checkbutton(root)
-Checkbutton2.place(relx=0.5,rely=0.21,relheight=0.06,relwidth=0.4)
+Checkbutton2.place(relx=0.5,rely=0.21,relheight=0.06,relwidth=0.5)
 Checkbutton2.configure(justify=tk.LEFT)
 Checkbutton2.configure(variable=midnightVar)
 Checkbutton2.configure(text='New file after midnight')
