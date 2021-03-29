@@ -1,5 +1,6 @@
 # SQM-Reader
 
+[![DOI](https://zenodo.org/badge/239331360.svg)](https://zenodo.org/badge/latestdoi/239331360)
 ![](https://img.shields.io/github/languages/top/pavolgaj/SQM-Reader.svg?style=flat)
 ![GitHub All Releases](https://img.shields.io/github/downloads/pavolgaj/SQM-Reader/total)
 
