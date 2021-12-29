@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# version 0.1.1 29-08-2020
+# version 0.1.2 29-12-2021
 import sys
 import os
 import tkinter as tk
@@ -12,6 +12,12 @@ import threading
 import math
 import serial
 import serial.tools.list_ports
+
+def mpsas2nelm(mpsas):
+    if mpsas>18.3: nelm=7.93-5*math.log10(math.pow(10,4.316-(mpsas/5.))+1)    #Scotopic vision
+    else: nelm=4.305-5*math.log10(math.pow(10,2.316-(mpsas/5.))+1)      #Photopic vision
+    return nelm
+
 
 def read1(block=True):
     '''read one data'''
@@ -29,7 +35,7 @@ def read1(block=True):
     #t=time.strftime('%Y_%m_%d %H:%M:%S',time.localtime(t0))
     t=time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(t0))      #for better import to excel
     mpsas=float(data[1][:-1])   #mpsas
-    nelm=round(7.93-5*math.log10(math.pow(10,4.316-(mpsas/5.))+1),2) #nelm
+    nelm=round(mpsas2nelm(mpsas),2) #nelm
     temp=float(data[-1][:-1])  #temperature in C
 
     mpsasVar.set(mpsas)
