@@ -132,6 +132,7 @@ def close():
 
 root=tk.Tk()
 root.geometry('400x350')
+root.resizable(0,0)
 root.title('SQM Reader')
 root.protocol('WM_DELETE_WINDOW',close)
 try: root.iconbitmap('sqm.ico')   #win
