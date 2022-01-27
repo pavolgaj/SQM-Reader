@@ -109,7 +109,7 @@ def select_path(event):
         path=path.replace('\\','/')
         cwd=os.getcwd().replace('\\','/')+'/'
         if cwd in path: path=path.replace(cwd,'')    #save relative path
-        if path==cwd[:-1]: path=''
+        if path==cwd[:-1]: path='./'
         if len(path)>0:
             if not path[-1]=='/': path+='/'
         pathVar.set(path)
@@ -152,6 +152,7 @@ mpsasVar=tk.DoubleVar(root)
 nelmVar=tk.DoubleVar(root)
 tempVar=tk.DoubleVar(root)
 timeVar=tk.StringVar(root)
+pathVar.set('./')
 
 Label1=tk.Label(root)
 Label1.place(relx=0.04,rely=0.03,height=21,width=30)
@@ -291,7 +292,8 @@ if os.path.isfile('sqm_config.txt'):
     f.close()
     if lines[0].strip() in TCombobox1['values']: portVar.set(lines[0].strip())
     baudVar.set(int(lines[1]))
-    pathVar.set(lines[2].strip())
+    if len(lines[2].strip())>0: pathVar.set(lines[2].strip())
+    else: pathVar.set('./')
     saveVar.set(lines[3].strip()=='True')
     dtVar.set(float(lines[4]))
     if len(lines)>5: midnightVar.set(lines[5].strip()=='True')
