@@ -54,6 +54,7 @@ def read1(block=True):
             f=open(name,'w')
             f.write('Date Time MPSAS NELM Temp(C)\n')
         f.write('%s %5.2f %5.2f %4.1f\n' %(t,mpsas,nelm,temp))
+        f.close()
     if block:  #unblock buttons for 1 reading
         Button1.configure(state=tk.NORMAL)
         Button2.configure(state=tk.NORMAL)
