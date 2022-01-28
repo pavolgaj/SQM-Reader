@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# version 0.1.2 29-12-2021
+# version 0.1.3 27-01-2022
 import sys
 import os
 import tkinter as tk
