@@ -30,8 +30,9 @@ def read1(block=True):
     t0=time.time()
     com.write(b'rx\r')
     time.sleep(5)  #wait for completing measurements
-    ans=com.readline().decode().strip()
-    data=ans.split(',')     #r,-09.42m,0000005915Hz,0000000000c,0000000.000s, 027.0C -> r,mpsas,freq,period,per,temp
+    ans=com.readline().decode().strip()    
+    #ans="r,-09.42m,0000005915Hz,0000000000c,0000000.000s, 027.0C"   #for testing...
+    data=ans.split(',')     #r,-09.42m,0000005915Hz,0000000000c,0000000.000s, 027.0C -> r,mpsas,freq,period,per,temp    
     #t=time.strftime('%Y_%m_%d %H:%M:%S',time.localtime(t0))
     t=time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(t0))      #for better import to excel
     mpsas=float(data[1][:-1])   #mpsas
@@ -44,17 +45,32 @@ def read1(block=True):
     timeVar.set(t)
 
     if saveVar.get():
-        name=pathVar.get()+'sqm_'+time.strftime('%Y_%m_%d')+'.dat'
-        #not create new file after midnight
-        if time.localtime().tm_hour<12 and not midnightVar.get():
-            if os.path.isfile(pathVar.get()+'sqm_'+time.strftime('%Y_%m_%d',time.localtime(time.time()-86400))+'.dat'):
-                name=pathVar.get()+'sqm_'+time.strftime('%Y_%m_%d',time.localtime(time.time()-86400))+'.dat'
-        if os.path.isfile(name): f=open(name,'a')
+        if uniVar.get():
+            name=pathVar.get()+'sqm_'+time.strftime('%Y_%m_%d')+'.csv'
+            #not create new file after midnight
+            if time.localtime().tm_hour<12 and not midnightVar.get():
+                if os.path.isfile(pathVar.get()+'sqm_'+time.strftime('%Y_%m_%d',time.localtime(time.time()-86400))+'.csv'):
+                    name=pathVar.get()+'sqm_'+time.strftime('%Y_%m_%d',time.localtime(time.time()-86400))+'.csv'
+            if os.path.isfile(name): f=open(name,'a')
+            else:
+                f=open(name,'w')
+                f.write('Date/Time,MPSAS,NELM,SerialNo,Protocol,Model,Feature,Temp(C)\n')
+            tt=time.strftime('%d.%m.%Y %H:%M:%S',time.localtime(t0))
+            f.write('%s,%5.2f,%5.2f,00000001,00000004,00000003,00000028,%4.1f\n' %(tt,mpsas,nelm,temp))
+            
+            f.close()        
         else:
-            f=open(name,'w')
-            f.write('Date Time MPSAS NELM Temp(C)\n')
-        f.write('%s %5.2f %5.2f %4.1f\n' %(t,mpsas,nelm,temp))
-        f.close()
+            name=pathVar.get()+'sqm_'+time.strftime('%Y_%m_%d')+'.dat'
+            #not create new file after midnight
+            if time.localtime().tm_hour<12 and not midnightVar.get():
+                if os.path.isfile(pathVar.get()+'sqm_'+time.strftime('%Y_%m_%d',time.localtime(time.time()-86400))+'.dat'):
+                    name=pathVar.get()+'sqm_'+time.strftime('%Y_%m_%d',time.localtime(time.time()-86400))+'.dat'
+            if os.path.isfile(name): f=open(name,'a')
+            else:
+                f=open(name,'w')
+                f.write('Date Time MPSAS NELM Temp(C)\n')
+                f.write('%s %5.2f %5.2f %4.1f\n' %(t,mpsas,nelm,temp))
+            f.close()
     if block:  #unblock buttons for 1 reading
         Button1.configure(state=tk.NORMAL)
         Button2.configure(state=tk.NORMAL)
@@ -127,6 +143,7 @@ def close():
     f.write(str(saveVar.get())+'\n')
     f.write(str(dtVar.get())+'\n')
     f.write(str(midnightVar.get())+'\n')
+    f.write(str(uniVar.get())+'\n')
     f.close()
     root.destroy()
     root=None
@@ -148,6 +165,7 @@ baudVar=tk.IntVar(root)
 dtVar=tk.DoubleVar(root)
 pathVar=tk.StringVar(root)
 saveVar=tk.BooleanVar(root)
+uniVar=tk.BooleanVar(root)
 midnightVar=tk.BooleanVar(root)
 mpsasVar=tk.DoubleVar(root)
 nelmVar=tk.DoubleVar(root)
@@ -192,8 +210,15 @@ Checkbutton1.configure(variable=saveVar)
 Checkbutton1.configure(text='Save to file')
 Checkbutton1.configure(anchor='w')
 
+Checkbutton3=tk.Checkbutton(root)
+Checkbutton3.place(relx=0.3,rely=0.21,relheight=0.06,relwidth=0.4)
+Checkbutton3.configure(justify=tk.LEFT)
+Checkbutton3.configure(variable=uniVar)
+Checkbutton3.configure(text='Unihedron CSV')
+Checkbutton3.configure(anchor='w')
+
 Checkbutton2=tk.Checkbutton(root)
-Checkbutton2.place(relx=0.5,rely=0.21,relheight=0.06,relwidth=0.5)
+Checkbutton2.place(relx=0.6,rely=0.21,relheight=0.06,relwidth=0.5)
 Checkbutton2.configure(justify=tk.LEFT)
 Checkbutton2.configure(variable=midnightVar)
 Checkbutton2.configure(text='New file after midnight')
@@ -299,6 +324,8 @@ if os.path.isfile('sqm_config.txt'):
     dtVar.set(float(lines[4]))
     if len(lines)>5: midnightVar.set(lines[5].strip()=='True')
     else: midnightVar.set(True)       #old version of config file
+    if len(lines)>6: uniVar.set(lines[6].strip()=='True')
+    else: uniVar.set(False)       #old version of config file
 else:
     saveVar.set(0)
     baudVar.set(115200)
